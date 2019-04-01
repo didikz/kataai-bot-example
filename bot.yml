@@ -1,0 +1,28 @@
+name: didikts
+tag: null
+projectName: dotintern
+flows:
+    fallback: $include(./flows/fallback.yml)
+    apply: $include(./flows/apply.yml)
+    api: $include(./flows/api.yml)
+nlus: $include(./nlus/nlu.yml)
+methods:
+    'displaySummary(message,context,data,options)': |-
+        var name = "jane doe";
+        var email = "jane@email.com"
+        if (context.name) {
+          name = context.name.value;
+        }
+
+        if (context.email) {
+          email = context.email.value;
+        }
+        var summary = "Nama: " + name + "\nEmail: " + email + "\nPosisi Magang: " + context.position + "\nDurasi: " + context.duration + " bulan\n";
+
+        return {
+          type: "text",
+          content: summary
+        }
+config: {}
+changelog: refactor
+author: ''

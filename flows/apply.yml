@@ -1,0 +1,209 @@
+active: true
+intents:
+    applyIntent:
+        type: text
+        initial: true
+        fallback: false
+        classifier:
+            nlu: applyIntentNL
+            match: applyIntent
+    positionChoosen:
+        type: data
+        initial: false
+        fallback: false
+        condition: payload.type == "selectedPosition"
+    profileFilled:
+        type: text
+        initial: false
+        fallback: false
+        classifier:
+            nlu: profileIntentNL
+            match: profileIntent
+        attributes:
+            givenName:
+                nlu: entitiesNL
+                path: person
+            givenEmail:
+                nlu: entitiesNL
+                path: email
+    durationFilled:
+        type: text
+        initial: false
+        fallback: false
+        classifier:
+            nlu: duration
+        attributes:
+            giventDuration:
+                nlu: duration
+    confirmSelection:
+        type: data
+        initial: false
+        fallback: false
+        condition: payload.type == "confirmation"
+    reenter:
+        type: command
+        initial: false
+        fallback: false
+        condition: content == "reenter"
+    startTelegram:
+        type: text
+        initial: true
+        fallback: false
+        condition: content == "/start"
+states:
+    init:
+        transitions:
+            welcomeApply:
+                fallback: true
+                condition: intent == "applyIntent" || intent == "startTelegram"
+        initial: true
+    welcomeApply:
+        transitions:
+            askProfile:
+                condition: intent == "positionChoosen"
+                mapping:
+                    context.position: payload.position
+            welcomeApply:
+                fallback: true
+        action:
+            -
+                name: welcomeApply
+            -
+                name: showAvailablePosition
+    askProfile:
+        transitions:
+            askDuration:
+                condition: intent == "profileFilled"
+                mapping:
+                    context.name: attributes.givenName
+                    context.email: attributes.givenEmail
+            askProfile:
+                fallback: true
+        action: askProfile
+        initial: false
+    askDuration:
+        transitions:
+            askConfirmation:
+                condition: intent == "durationFilled"
+                mapping:
+                    context.duration: content
+            askDuration:
+                fallback: true
+        action:
+            -
+                name: askInternDuration
+            -
+                name: sayHello
+    askConfirmation:
+        transitions:
+            summary:
+                condition: intent == "confirmSelection" && payload.value == "y"
+            cancel:
+                condition: intent == "confirmSelection" && payload.value == "n"
+            askConfirmation:
+                fallback: true
+        action: askConfirmation
+    summary:
+        transitions: {}
+        action:
+            -
+                name: showSummary
+            -
+                name: summaryAction
+            -
+                name: apiCommand
+        enter:
+            data.name: context.name.value
+            data.position: context.position
+            data.email: context.email.value
+            data.duration: context.duration
+        end: true
+    cancel:
+        transitions: {}
+        action: cancelResponse
+        end: true
+actions:
+    welcomeApply:
+        type: text
+        options:
+            text: 'Hi, selamat datang di DOT Indonesia. Mau magang sebagai posisi apa?'
+    showAvailablePosition:
+        type: template
+        options:
+            type: button
+            items:
+                title: Available Position
+                text: Silakan pilih posisi magang di bawah ini.
+                actions:
+                    -
+                        type: postback
+                        label: Backend Dev Intern
+                        text: ''
+                        payload:
+                            type: selectedPosition
+                            position: Backend Dev Intern
+                    -
+                        type: postback
+                        label: Frontend Dev Intern
+                        payload:
+                            type: selectedPosition
+                            position: Frontend Dev Intern
+                    -
+                        type: postback
+                        label: QA Intern
+                        payload:
+                            type: selectedPosition
+                            position: QA Intern
+    askProfile:
+        type: text
+        options:
+            text: >-
+                Keren, kamu mau daftar sebagai $(payload.position) sekarang masukkan nama lengkap dan email kamu. Contoh: vitas purnomo
+                vitas@gmail.com
+    askInternDuration:
+        type: text
+        options:
+            text: Berapa bulan kamu akan magang?
+    askConfirmation:
+        type: template
+        options:
+            type: button
+            items:
+                title: Confirmation
+                text: >-
+                    Ok $(context.name.value), apakah kamu yakin akan magang sebagai $(context.position) di sini selama $(context.duration)
+                    bulan?
+                actions:
+                    -
+                        type: postback
+                        label: Ya
+                        payload:
+                            type: confirmation
+                            value: 'y'
+                    -
+                        type: postback
+                        label: Tidak
+                        payload:
+                            type: confirmation
+                            value: 'n'
+    showSummary:
+        type: text
+        options:
+            text: 'Baiklah, ini ringkasan data magang kamu'
+    cancelResponse:
+        type: text
+        options:
+            text: 'Wah sayang sekali, kalau begitu sampai jumpa di kehidupan yang lain'
+    sayHello:
+        type: text
+        options:
+            text: 'Salam kenal $(context.name.value), email kamu $(context.email.value)'
+    summaryAction:
+        method: displaySummary
+        type: method
+        options: {}
+    apiCommand:
+        type: command
+        options:
+            command: startApiCommand
+methods: {}

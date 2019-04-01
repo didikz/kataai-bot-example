@@ -1,0 +1,70 @@
+active: true
+intents:
+    startApiCommand:
+        type: command
+        initial: true
+        fallback: false
+        condition: content == "startApiCommand"
+    handleAPIIntent:
+        type: command
+        initial: false
+        fallback: false
+        condition: content == "handleAPIResult"
+states:
+    init:
+        transitions:
+            callAPI:
+                fallback: true
+                condition: intent == "startApiCommand"
+        initial: true
+    callAPI:
+        transitions:
+            successAPI:
+                condition: intent == "handleAPIIntent" && payload.result
+            failedAPI:
+                fallback: true
+                condition: intent == "handleAPIIntent" && !payload.result
+        action:
+            -
+                name: callAPIBored
+            -
+                name: handleAPI
+    successAPI:
+        transitions: {}
+        action:
+            -
+                name: successData
+            -
+                name: showInternData
+        end: true
+    failedAPI:
+        transitions: {}
+        action: failedAPI
+        end: true
+actions:
+    callAPIBored:
+        type: api
+        options:
+            uri: 'https://www.boredapi.com/api/activity'
+            method: GET
+            query:
+                type: recreational
+    handleAPI:
+        type: command
+        options:
+            command: handleAPIResult
+            payload:
+                result: $(result)
+    successData:
+        type: text
+        options:
+            text: Activity $(payload.result.activity) type $(payload.result.type)
+    failedAPI:
+        type: text
+        options:
+            text: Maaf gagal mendapatkan data
+    showInternData:
+        type: text
+        options:
+            text: Nama kamu $(data.name) magang posisi $(data.position)
+methods: {}

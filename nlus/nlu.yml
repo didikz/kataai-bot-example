@@ -1,0 +1,33 @@
+keywordNLU:
+    type: keyword
+    options:
+        keywords:
+            apply:
+                - daftar
+                - registrasi
+                - register
+                - pendaftaran
+profileIntentNL:
+    type: nl
+    options:
+        nluId: 'didikts:dotintern'
+        threshold: 0.8
+        asIntent: intent
+        output: raw
+entitiesNL:
+    type: nl
+    options:
+        nluId: 'didikts:dotintern'
+        threshold: 0.5
+        output: raw
+duration:
+    type: regex
+    options:
+        regex: '[1-9]'
+applyIntentNL:
+    type: nl
+    options:
+        nluId: 'didikts:dotintern'
+        threshold: 0.8
+        asIntent: intent
+        output: raw
