@@ -6,6 +6,12 @@ intents:
         initial: true
         fallback: false
         condition: content == "startApiCommand"
+    startApiText:
+        type: text
+        initial: true
+        classifier:
+            nlu: keywordNLU
+            match: api
     handleAPIIntent:
         type: command
         initial: false
@@ -16,7 +22,7 @@ states:
         transitions:
             callAPI:
                 fallback: true
-                condition: intent == "startApiCommand"
+                condition: intent == "startApiCommand" || intent == "startApiText"
         initial: true
     callAPI:
         transitions:

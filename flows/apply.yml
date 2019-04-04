@@ -51,7 +51,18 @@ intents:
         initial: true
         fallback: false
         condition: content == "/start"
+    startApiText:
+        type: text
+        classifier:
+            nlu: keywordNLU
+            match: api
 states:
+    apiFlow:
+        initial: false
+        end: true
+        action: apiCommand
+        float:
+            condition: intent == "startApiText"
     init:
         transitions:
             welcomeApply:

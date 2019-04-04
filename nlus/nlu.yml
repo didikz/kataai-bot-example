@@ -7,6 +7,8 @@ keywordNLU:
                 - registrasi
                 - register
                 - pendaftaran
+            api:
+                - api
 profileIntentNL:
     type: nl
     options:
